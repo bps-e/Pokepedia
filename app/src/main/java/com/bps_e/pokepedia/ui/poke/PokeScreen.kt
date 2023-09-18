@@ -37,8 +37,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -108,35 +112,38 @@ fun PokeCard(
     modifier: Modifier = Modifier,
 ) {
     poke.entry.apply {
-        var localName = ""
-        var localGenera = ""
-        var localType = ""
-        var localFlavor = ""
-        var localAbility = ""
-        runBlocking {
-            localName = viewModel.localPokemonName(name)
-            localGenera = viewModel.localGenera(id)
-            localFlavor = viewModel.localPokemonFlavor(id)
+        var localName by remember { mutableStateOf("") }
+        var localGenera by remember { mutableStateOf("") }
+        var localType by remember { mutableStateOf("") }
+        var localFlavor by remember { mutableStateOf("") }
+        var localAbility by remember { mutableStateOf("") }
+        LaunchedEffect(Unit) {
+            runBlocking {
+                localName = viewModel.localPokemonName(name)
+                localGenera = viewModel.localGenera(id)
+                localFlavor = viewModel.localPokemonFlavor(id)
 
-            types.forEach {
-                val local = viewModel.localTypeName(it)
+                types.forEach {
+                    val local = viewModel.localTypeName(it)
 
-                if (localType.length > 0) localType += " / "
-                localType += local
-            }
+                    if (localType.length > 0) localType += " / "
+                    localType += local
+                }
 
-            abilities.forEach {
-                val split = it.split("@")
-                val local = viewModel.localAbilityName(split[0])
+                abilities.forEach {
+                    val split = it.split("@")
+                    val local = viewModel.localAbilityName(split[0])
 
-                if (localAbility.length > 0) localAbility += " / "
-                if (split.size > 1) localAbility += "(夢)"
-                localAbility += local
+                    if (localAbility.length > 0) localAbility += " / "
+                    if (split.size > 1) localAbility += "(夢)"
+                    localAbility += local
+                }
             }
         }
-        val statTitle = viewModel.statTitle
+        val statTitle by remember { mutableStateOf(viewModel.statTitle) }
 
-        OutlinedCard(modifier.padding(8.dp, 0.dp).fillMaxWidth()) {
+        OutlinedCard(
+            modifier.padding(8.dp, 0.dp).fillMaxWidth()) {
             CardImage(poke)
             Divider(color = Color.LightGray)
 
